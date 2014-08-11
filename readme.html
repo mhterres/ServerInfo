@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<title>ServerInfo Plugin Readme</title>
+<style type="text/css">
+  BODY {
+      font-size : 100%;
+  }
+  BODY, TD, TH {
+      font-family : tahoma, verdana, arial, helvetica, sans-serif;
+      font-size : 0.8em;
+  }
+  H2 {
+       font-size : 10pt;
+       font-weight : bold;
+  }
+  A:hover {
+      text-decoration : none;
+  }
+  H1 {
+      font-family : tahoma, arial, helvetica, sans-serif;
+      font-size : 1.4em;
+      font-weight: bold;
+      border-bottom : 1px #ccc solid;
+      padding-bottom : 2px;
+  }
+
+  TT {
+      font-family : courier new;
+      font-weight : bold;
+      color : #060;
+  }
+  PRE {
+      font-family : courier new;
+      font-size : 100%;
+  }
+</style>
+</head>
+<body>
+
+<h1>ServerInfo Plugin Readme</h1>
+
+<h2>Overview</h2>
+<p>Display server informations, like number of online users or number of server sessions.
+</p>
+
+<h2>Installation</h2>
+<p>Copy the serverinfo.jar into the plugins directory of your Openfire installation. The plugin will then be automatically deployed. To upgrade to a new version, copy the new serverinfo.jar file over the existing file.</p>
+
+<h2>Using the Plugin</h2>
+<ul>
+   <li>Send a message with content "total users" to info@serverinfo.jabberdomain to receive the number of total users.</li>
+   <li>Send a message with content "online users" to info@serverinfo.jabberdomain to receive the number of online users.</li>
+   <li>Send a message with content "server sessions" to info@serverinfo.jabberdomain to receive the number of incoming server sessions.</li>
+</ul>
+<p>In version 0.2 you can open a connection to port 4455 and send the same messages to obtain data.</p>
+
+</body>
+

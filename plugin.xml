@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin>
+   <class>org.mos.openfire.plugin.ServerInfoPlugin</class>
+   <name>ServerInfo</name>
+   <description>Display server informations, like number of online users or number of server sessions.</description>
+   <author>Marcelo Hartmann Terres</author>
+   <version>0.2</version>
+   <date>08/08/2014</date>
+   <minServerVersion>3.8.0</minServerVersion>
+
+   <adminconsole>
+      <tab id="tab-users">
+         <sidebar id="sidebar-users">
+            <item id="serverinfo-form" name="Server Informations" url="serverinfo-form.jsp" description="Server Informations" />
+         </sidebar>
+      </tab>
+   </adminconsole>
+</plugin>
