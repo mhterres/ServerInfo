@@ -22,12 +22,14 @@ package org.mos.openfire.plugin;
 
 import java.net.*;
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 
 import org.dom4j.Element;
 import org.jivesoftware.openfire.SessionManager;
@@ -68,10 +70,12 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
     private ComponentManager componentManager;
     private PluginManager pluginManager;
     private UserManager userManager;
-    private Socket sck;
     private Socket          socket   = null;
     private ServerSocket    server   = null;
     private DataInputStream streamIn =  null;
+    private OFD_Server ofd_srv = new OFD_Server();
+    public static Thread ofThread;
+    public static Boolean NotExit = true;
 
     /**
      * Constructs a new serverinfo plugin.
@@ -85,7 +89,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
     public void initializePlugin(PluginManager manager, File pluginDirectory)
     {
 
-	Log.info("Starting ServerInfo plugin.");
+	Log.info("ServerInfo - Starting plugin.");
 
         pluginManager = manager;
         sessionManager = SessionManager.getInstance();
@@ -102,14 +106,14 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
         }
         PropertyEventDispatcher.addListener(this);
 
-	Log.info("Start binding to port 4455.");
-	OFD_Server ofd_srv = new OFD_Server();
+	Log.info("ServerInfo - Starting bind on port 4455.");
 	ofd_srv.startServer();
-	Log.info("Exit???");
-
     }
 
     public void destroyPlugin() {
+
+	Log.info("ServerInfo - Closing plugin.");
+
         PropertyEventDispatcher.removeListener(this);
         // Unregister component.
         if (componentManager != null) {
@@ -120,11 +124,17 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
                 Log.error(e.getMessage(), e);
             }
         }
+        serviceName = JiveGlobals.getProperty("plugin.serverinfo.serviceName", "");
         componentManager = null;
         userManager = null;
         pluginManager = null;
         sessionManager = null;
-        sck = null;
+
+	Log.info("ServerInfo - Closing thread.");
+	clientConnect();
+	ServerInfoPlugin.NotExit=false;
+	ServerInfoPlugin.ofThread.stop();
+	Log.info("ServerInfo - Thread closed.");
     }
 
     public void initialize(JID jid, ComponentManager componentManager) {
@@ -134,6 +144,33 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
     }
 
     public void shutdown() {
+ 	Log.info("ServerInfo - Shutdown thread.");
+	clientConnect();
+	ServerInfoPlugin.NotExit=false;
+	ServerInfoPlugin.ofThread.stop();
+	Log.info("ServerInfo - Thread closed.");
+    }
+
+    public void clientConnect() {
+
+	try
+	{
+		Log.info("ServerInfo - Making local connection.");
+	        Socket clientSocket = new Socket("localhost", 4455);
+        	DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+
+	        outToServer.writeBytes(".\n");
+        	clientSocket.close();
+	}
+	catch (UnknownHostException e) 
+	{
+                Log.error(e.getMessage(), e);
+	}
+        catch (IOException e) 
+	{
+
+                Log.error(e.getMessage(), e);
+	}
     }
 
     // Component Interface
@@ -203,22 +240,6 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	    {
 		Log.error(e.getMessage(), e);
 	    }
-
-	 
-	            // send to all users
-//	      		Collection<User> users = userManager.getUsers();
-//	      		String xmppdomain = "@" + JiveGlobals.getProperty("xmpp.domain");
-//	      		for (User u : users)
-//	      		{
-//	      			Message newMessage = message.createCopy();
-//	      			newMessage.setTo(u.getUsername() + xmppdomain);
-//	               try {
-//	                  componentManager.sendPacket(this, newMessage);
-//	              } catch (Exception e) {
-//	                  Log.error(e.getMessage(), e);
-//	              }
-//	      		}
-//            }
         }
     }
 
@@ -367,7 +388,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 class OFD_Server {
 
     public static void main(String[] args) {
-    	Log.info("Running startServer.");
+    	Log.info("ServerInfo - Running startServer.");
         new OFD_Server().startServer();
     }
 
@@ -377,10 +398,10 @@ class OFD_Server {
             @Override
             public void run() {
                 try {
-		    Log.info("Open socket 4455.");
+		    Log.info("ServerInfo - Opening socket in port 4455.");
                     ServerSocket serverSocket = new ServerSocket(4455);
-                    Log.info("Waiting for clients to connect...");
-                    while (true) {
+                    Log.info("ServerInfo - Waiting for connection.");
+                    while (ServerInfoPlugin.NotExit) {
                         Socket clientSocket = serverSocket.accept();
       			String input="";
 			String line;
@@ -399,27 +420,38 @@ class OFD_Server {
 	  
 					out.println(text);
 					input = "";
+
+					if (!ServerInfoPlugin.NotExit) {
+						Log.info("ServerInfo - Receive signal to close thread.");
+						break;
+						}
 			        }
 
 
 			        clientSocket.close();		
 			      } catch (IOException ioe) {
-			        System.out.println("IOException on socket listen: " + ioe);
+			        Log.error("ServerInfo - IOException on socket listen: " + ioe);
 			        ioe.printStackTrace();
 			      }
  
                     }
+
+
+		    Log.info("ServerInfo - Thread closing.");
                 } catch (IOException e) {
-                    System.err.println("Unable to process client request");
+                    Log.error("ServerInfo - Unable to process client request");
                     e.printStackTrace();
                 }
             }
         };
-        Thread serverThread = new Thread(serverTask);
-        serverThread.start();
+        ServerInfoPlugin.ofThread = new Thread(serverTask);
+        ServerInfoPlugin.ofThread.start();
+	Log.info("ServerInfo - Thread Created.");
 
     }
+
 }
+
 
 class MyMessage {
 
@@ -428,22 +460,31 @@ class MyMessage {
 
   private UserManager userManager = UserManager.getInstance();
   private SessionManager sessionManager = SessionManager.getInstance();
-
-
+  private XMPPServer xmppServer = XMPPServer.getInstance();
+  private DecimalFormat mbFormat = new DecimalFormat("#0.00");
+  private DecimalFormat mbIntFormat = new DecimalFormat("#0");
+ 
   public String returnMessage(String message) {
 	
   	msg =  "Invalid command: " + message + ". Try again.";
 
+	Log.debug("ServerInfo - Command: " + message + ".");
+
 	if ( message.equals("online users") ) 
 		{
          		msg = "";
-			msgTot = sessionManager.getConnectionsCount(true);
+			//msgTot = sessionManager.getConnectionsCount(true);
+			msgTot = sessionManager.getUserSessionsCount(true);
+
+			Log.debug("ServerInfo - getUserSessionsCount: " + Integer.toString(msgTot) + ".");
 		}
 
 	else if ( message.equals("server sessions") ) 
 		{
 			msg= "";
 			msgTot = sessionManager.getIncomingServerSessionsCount(true);
+
+			Log.debug("ServerInfo - getIncomingServerSessionsCount: " + Integer.toString(msgTot) + ".");
 		}
 
 	else if ( message.equals("total users") ) 
@@ -456,7 +497,79 @@ class MyMessage {
 			{
 				msgTot = msgTot + 1;
 			}
+
+			Log.debug("ServerInfo - getUsers: " + Integer.toString(msgTot) + ".");
 		}
+
+	else if ( message.equals("version") ) 
+		{
+
+			msg="ServerInfo version 0.3";
+		}
+
+	else if ( message.equals("openfire version") ) 
+		{
+
+			msg="Openfire version: " + xmppServer.getServerInfo().getVersion().getVersionString();
+		}
+
+	else if ( message.equals("openfire host") ) 
+		{
+
+			msg="Openfire hostname: " + xmppServer.getServerInfo().getHostname();
+		}
+
+	else if ( message.equals("openfire uptime") ) 
+		{
+
+			msg="Openfire last started: " + xmppServer.getServerInfo().getLastStarted();
+		}
+
+	else if ( message.equals("java version") )
+		{
+		
+			msg = "Java " + System.getProperty("java.version") + " " +System.getProperty("java.vendor") + " " + System.getProperty("java.vm.name");
+		}
+
+	else if ( message.equals("total memory") )
+		{
+			msg = "Total available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024)) + "MB";
+		}
+
+	else if ( message.equals("total memory num") )
+		{
+			msg = mbIntFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024));
+		}
+
+	else if ( message.equals("free memory") )
+		{
+			msg = "Total free available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024)) + "MB";
+		}
+
+	else if ( message.equals("free memory num") )
+		{
+			msg = mbIntFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024));
+		}
+
+	else if ( message.equals("used memory") )
+		{
+			msg = "Total used memory by the JVM: " + mbFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024)) + "MB";
+		}
+
+	else if ( message.equals("used memory num") )
+		{
+			msg = mbIntFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024));
+		}
+
+        else if ( message.equals("max memory") )
+                {
+                        msg = "Total maximum available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024)) + "MB";
+                }
+
+        else if ( message.equals("max memory num") )
+                {
+                        msg = mbIntFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024));
+                }
 
 	if ( msg.equals("") ) {
 		return Integer.toString(msgTot);
