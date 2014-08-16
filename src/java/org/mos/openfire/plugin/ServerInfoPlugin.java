@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-
 import org.dom4j.Element;
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.XMPPServer;
@@ -217,6 +216,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 
     private void processMessage(Message message, boolean targetSrv,boolean canProceed) 
     {
+
         if (targetSrv) 
 	{
 
@@ -226,9 +226,10 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	    String text = MyMsg.returnMessage(body);
 
 	    String xmppdomain = "@" + JiveGlobals.getProperty("xmpp.domain");
-
+	    String to = message.getFrom().toBareJID();
+	    
 	    Message newMessage = new Message();
-	    newMessage.setTo("marcelo" + xmppdomain);
+	    newMessage.setTo(to);
 	    newMessage.setFrom("info@serverinfo."+JiveGlobals.getProperty("xmpp.domain"));
 	    newMessage.setSubject("Resultado");
 	    newMessage.setBody(text);
@@ -330,7 +331,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
      * @param serviceName the service name of this component.
      */
     public void setServiceName(String serviceName) {
-        JiveGlobals.setProperty("plugin.broadcast.serviceName", serviceName);
+        JiveGlobals.setProperty("plugin.serverinfo.serviceName", serviceName);
     }
 
     // PropertyEventListener Methods
@@ -343,7 +344,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 
     public void propertyDeleted(String property, Map<String, Object> params) {
         if (property.equals("plugin.serverinfo.serviceName")) {
-            changeServiceName("broadcast");
+            changeServiceName("serverinfo");
         }
     }
 
@@ -504,7 +505,7 @@ class MyMessage {
 	else if ( message.equals("version") ) 
 		{
 
-			msg="ServerInfo version 0.3";
+			msg="ServerInfo version 0.3.1";
 		}
 
 	else if ( message.equals("openfire version") ) 
