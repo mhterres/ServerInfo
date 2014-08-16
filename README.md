@@ -1,4 +1,4 @@
-# ServerInfo
+# ServerInfo Openfire plugin
 
 Display server informations, like number of online users, server sessions, memory, software version, etc...
 
