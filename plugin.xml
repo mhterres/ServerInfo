@@ -5,8 +5,8 @@
    <name>ServerInfo</name>
    <description>Display server informations, like number of online users or number of server sessions.</description>
    <author>Marcelo Hartmann Terres</author>
-   <version>0.3.1</version>
-   <date>08/14/2014</date>
+   <version>0.3.1.1</version>
+   <date>08/17/2014</date>
    <minServerVersion>3.8.0</minServerVersion>
 
    <adminconsole>

@@ -474,10 +474,8 @@ class MyMessage {
 	if ( message.equals("online users") ) 
 		{
          		msg = "";
-			//msgTot = sessionManager.getConnectionsCount(true);
 			msgTot = sessionManager.getUserSessionsCount(true);
 
-			Log.debug("ServerInfo - getUserSessionsCount: " + Integer.toString(msgTot) + ".");
 		}
 
 	else if ( message.equals("server sessions") ) 
@@ -485,7 +483,6 @@ class MyMessage {
 			msg= "";
 			msgTot = sessionManager.getIncomingServerSessionsCount(true);
 
-			Log.debug("ServerInfo - getIncomingServerSessionsCount: " + Integer.toString(msgTot) + ".");
 		}
 
 	else if ( message.equals("total users") ) 
@@ -499,7 +496,6 @@ class MyMessage {
 				msgTot = msgTot + 1;
 			}
 
-			Log.debug("ServerInfo - getUsers: " + Integer.toString(msgTot) + ".");
 		}
 
 	else if ( message.equals("version") ) 
