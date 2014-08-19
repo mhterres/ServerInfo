@@ -425,7 +425,7 @@ class OFD_Server {
 					if (!ServerInfoPlugin.NotExit) {
 						Log.info("ServerInfo - Receive signal to close thread.");
 						break;
-						}
+					}
 			        }
 
 
@@ -471,108 +471,103 @@ class MyMessage {
 
 	Log.debug("ServerInfo - Command: " + message + ".");
 
-	if ( message.equals("online users") ) 
-		{
-         		msg = "";
-			msgTot = sessionManager.getUserSessionsCount(true);
+	if ( message.equals("online users") ) {
 
+       		msg = "";
+		msgTot = sessionManager.getUserSessionsCount(true);
+	}
+
+	else if ( message.equals("server sessions") ) {
+
+		msg= "";
+		msgTot = sessionManager.getIncomingServerSessionsCount(true);
+
+	}
+
+	else if ( message.equals("total users") ) {
+
+		msg= "";
+		msgTot = 0;
+
+		Collection<User> users = userManager.getUsers();
+
+      		for (User u : users) {
+			msgTot = msgTot + 1;
 		}
 
-	else if ( message.equals("server sessions") ) 
-		{
-			msg= "";
-			msgTot = sessionManager.getIncomingServerSessionsCount(true);
+	}
 
-		}
+	else if ( message.equals("version") ) {
 
-	else if ( message.equals("total users") ) 
-		{
-			msg= "";
-			msgTot = 0;
+		msg="ServerInfo version 0.3.2";
+	}
 
-      			Collection<User> users = userManager.getUsers();
-      			for (User u : users)
-			{
-				msgTot = msgTot + 1;
-			}
+	else if ( message.equals("openfire version") ) {
 
-		}
+		msg="Openfire version: " + xmppServer.getServerInfo().getVersion().getVersionString();
+	}
 
-	else if ( message.equals("version") ) 
-		{
+	else if ( message.equals("openfire host") ) {
 
-			msg="ServerInfo version 0.3.1";
-		}
+		msg="Openfire hostname: " + xmppServer.getServerInfo().getHostname();
+	}
 
-	else if ( message.equals("openfire version") ) 
-		{
+	else if ( message.equals("openfire uptime") ) {
 
-			msg="Openfire version: " + xmppServer.getServerInfo().getVersion().getVersionString();
-		}
+		msg="Openfire last started: " + xmppServer.getServerInfo().getLastStarted();
+	}
 
-	else if ( message.equals("openfire host") ) 
-		{
-
-			msg="Openfire hostname: " + xmppServer.getServerInfo().getHostname();
-		}
-
-	else if ( message.equals("openfire uptime") ) 
-		{
-
-			msg="Openfire last started: " + xmppServer.getServerInfo().getLastStarted();
-		}
-
-	else if ( message.equals("java version") )
-		{
+	else if ( message.equals("java version") ) {
 		
-			msg = "Java " + System.getProperty("java.version") + " " +System.getProperty("java.vendor") + " " + System.getProperty("java.vm.name");
-		}
+		msg = "Java " + System.getProperty("java.version") + " " +System.getProperty("java.vendor") + " " + System.getProperty("java.vm.name");
+	}
 
-	else if ( message.equals("total memory") )
-		{
-			msg = "Total available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024)) + "MB";
-		}
+	else if ( message.equals("total memory") ) {
 
-	else if ( message.equals("total memory num") )
-		{
-			msg = mbIntFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024));
-		}
+		msg = "Total available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024)) + "MB";
+	}
 
-	else if ( message.equals("free memory") )
-		{
-			msg = "Total free available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024)) + "MB";
-		}
+	else if ( message.equals("total memory num") ) {
 
-	else if ( message.equals("free memory num") )
-		{
-			msg = mbIntFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024));
-		}
+		msg = mbIntFormat.format((((Runtime.getRuntime().totalMemory())/1024)/1024));
+	}
 
-	else if ( message.equals("used memory") )
-		{
-			msg = "Total used memory by the JVM: " + mbFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024)) + "MB";
-		}
+	else if ( message.equals("free memory") ) {
 
-	else if ( message.equals("used memory num") )
-		{
-			msg = mbIntFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024));
-		}
+		msg = "Total free available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024)) + "MB";
+	}
 
-        else if ( message.equals("max memory") )
-                {
-                        msg = "Total maximum available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024)) + "MB";
-                }
+	else if ( message.equals("free memory num") ) {
 
-        else if ( message.equals("max memory num") )
-                {
-                        msg = mbIntFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024));
-                }
+		msg = mbIntFormat.format((((Runtime.getRuntime().freeMemory())/1024)/1024));
+	}
+
+	else if ( message.equals("used memory") ) {
+
+		msg = "Total used memory by the JVM: " + mbFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024)) + "MB";
+	}
+
+	else if ( message.equals("used memory num") ) {
+
+		msg = mbIntFormat.format(((((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()))/1024)/1024));
+	}
+
+        else if ( message.equals("max memory") ) {
+
+	msg = "Total maximum available memory to the JVM: " + mbFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024)) + "MB";
+	}
+
+        else if ( message.equals("max memory num") ) {
+
+	msg = mbIntFormat.format((((Runtime.getRuntime().maxMemory())/1024)/1024));
+	}
 
 	if ( msg.equals("") ) {
+
 		return Integer.toString(msgTot);
 	}
-	else
-	{
+	else {
+
 		return msg;
 	}
   }
