@@ -5,15 +5,7 @@
    <name>ServerInfo</name>
    <description>Display server informations, like number of online users or number of server sessions.</description>
    <author>Marcelo Hartmann Terres</author>
-   <version>0.3.2.1</version>
-   <date>08/26/2014</date>
+   <version>0.3.2.2</version>
+   <date>09/26/2014</date>
    <minServerVersion>3.8.0</minServerVersion>
-
-   <adminconsole>
-      <tab id="tab-users">
-         <sidebar id="sidebar-users">
-            <item id="serverinfo-form" name="Server Informations" url="serverinfo-form.jsp" description="Server Informations" />
-         </sidebar>
-      </tab>
-   </adminconsole>
 </plugin>

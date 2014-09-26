@@ -592,7 +592,7 @@ class MyMessage {
 
 		else if ( message.equals("version") ) {
 
-			msg="ServerInfo version 0.3.2";
+			msg="ServerInfo version 0.3.2.2";
 		}
 
 		else if ( message.equals("openfire version") ) {
