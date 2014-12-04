@@ -62,7 +62,8 @@ import org.xmpp.packet.Presence;
 */
 public class ServerInfoPlugin implements Plugin, Component, PropertyEventListener {
 
-	//private static final Logger Log = LoggerFactory.getLogger(ServerInfoPlugin.class);
+	private static final String SERVERINFOPORT = "plugin.serverinfo.port";
+	private static final String SERVERINFOIP = "plugin.serverinfo.ip";
 
 	private String serviceName;
 	private SessionManager sessionManager;
@@ -75,6 +76,9 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	private OFD_Server ofd_srv = new OFD_Server();
 	public static Thread ofThread;
 	public static Boolean NotExit = true;
+	public static String serverInfoPort = JiveGlobals.getProperty(SERVERINFOPORT, "4455");
+	public static String serverInfoIP = JiveGlobals.getProperty(SERVERINFOIP, "127.0.0.1");
+
 
 	/**
 	* Constructs a new serverinfo plugin.
@@ -87,12 +91,13 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	// Plugin Interface
 
 	public void initializePlugin(PluginManager manager, File pluginDirectory) {
-
+	
 		Log.info("ServerInfo - Starting plugin.");
 		Log.debug("ServerInfo - Starting plugin.");
 
 		pluginManager = manager;
 		sessionManager = SessionManager.getInstance();
+		String serverInfoPort = JiveGlobals.getProperty(SERVERINFOPORT, "4455");
 
 		userManager = UserManager.getInstance();
 
@@ -110,8 +115,8 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 
 		PropertyEventDispatcher.addListener(this);
 
-		Log.info("ServerInfo - Starting bind on port 4455.");
-		Log.debug("ServerInfo - Starting bind on port 4455.");
+		Log.info("ServerInfo - Starting bind on port " + serverInfoPort + ".");
+		Log.debug("ServerInfo - Starting bind on port " + serverInfoPort + ".");
 		ofd_srv.startServer();
 	}
 
@@ -150,6 +155,22 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 		Log.debug("ServerInfo - Thread closed.");
 	}
 
+        public void setPort(String port) {
+                JiveGlobals.setProperty(SERVERINFOPORT, port);
+        }
+
+        public String getPort() {
+                return JiveGlobals.getProperty(SERVERINFOPORT, "4455");
+        }
+
+        public void setIP(String IP) {
+                JiveGlobals.setProperty(SERVERINFOIP, IP);
+        }
+
+        public String getIP() {
+                 return JiveGlobals.getProperty(SERVERINFOIP, "127.0.0.1");
+        }
+
 	public void initialize(JID jid, ComponentManager componentManager) {
 	}
 
@@ -170,10 +191,12 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	public void clientConnect() {
 
 		try {
+		        //String serverInfoPort = JiveGlobals.getProperty(SERVERINFOPORT, "4455");
+			//String serverInfoIP = JiveGlobals.getProperty(SERVERINFOIP, "127.0.0.1");
 
 			Log.info("ServerInfo - Making local connection.");
-			Log.debug("ServerInfo - Making local connection no port 4455.");
-			Socket clientSocket = new Socket("localhost", 4455);
+			Log.debug("ServerInfo - Making local connection no port " + serverInfoPort + ".");
+			Socket clientSocket = new Socket(serverInfoIP,Integer.parseInt(serverInfoPort));
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			
 			Log.debug("ServerInfo - Send disconnect commando to local server.");
@@ -462,6 +485,9 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 
 class OFD_Server {
 
+        private static final String SERVERINFOPORT = "plugin.serverinfo.port";
+        private static final String SERVERINFOIP = "plugin.serverinfo.ip";
+
 	public static void main(String[] args) {
 
 		Log.info("ServerInfo - Running startServer.");
@@ -476,13 +502,16 @@ class OFD_Server {
 		@Override
 		public void run() {
 
+			String serverInfoPort = JiveGlobals.getProperty(SERVERINFOPORT, "4455");
+			String serverInfoIP = JiveGlobals.getProperty(SERVERINFOIP, "127.0.0.1");
+
 			try {
 
-				Log.info("ServerInfo - Opening socket in port 4455.");
-				Log.debug("ServerInfo - Opening socket in port 4455.");
-				ServerSocket serverSocket = new ServerSocket(4455);
+				Log.info("ServerInfo - Opening socket in IP " + serverInfoIP + " port " + serverInfoPort + ".");
+				Log.debug("ServerInfo - Opening socket in IP " + serverInfoIP + " port " + serverInfoPort + ".");
+				ServerSocket serverSocket = new ServerSocket(Integer.parseInt(serverInfoPort),1,InetAddress.getByName(serverInfoIP));
 				Log.info("ServerInfo - Waiting for connection.");
-				Log.debug("ServerInfo - Listen on port 4455.");
+				Log.debug("ServerInfo - Listen on IP " + serverInfoIP + " port " + serverInfoPort  + ".");
 				Log.debug("Waiting for connection.");
 
 				while (ServerInfoPlugin.NotExit) {
@@ -592,7 +621,7 @@ class MyMessage {
 
 		else if ( message.equals("version") ) {
 
-			msg="ServerInfo version 0.3.2.2";
+			msg="ServerInfo version 0.4";
 		}
 
 		else if ( message.equals("openfire version") ) {
