@@ -70,6 +70,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	private ComponentManager componentManager;
 	private PluginManager pluginManager;
 	private UserManager userManager;
+
 	private Socket socket = null;
 	private ServerSocket server = null;
 	private DataInputStream streamIn =  null;
@@ -191,9 +192,6 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 	public void clientConnect() {
 
 		try {
-		        //String serverInfoPort = JiveGlobals.getProperty(SERVERINFOPORT, "4455");
-			//String serverInfoIP = JiveGlobals.getProperty(SERVERINFOIP, "127.0.0.1");
-
 			Log.info("ServerInfo - Making local connection.");
 			Log.debug("ServerInfo - Making local connection no port " + serverInfoPort + ".");
 			Socket clientSocket = new Socket(serverInfoIP,Integer.parseInt(serverInfoPort));
@@ -281,7 +279,7 @@ public class ServerInfoPlugin implements Plugin, Component, PropertyEventListene
 			Log.debug("ServerInfo - Original message from: " + to);
 			Log.debug("ServerInfo - Original message body: " + body);
 
-			MyMessage MyMsg = new MyMessage();
+			MyMessage_OF MyMsg = new MyMessage_OF();
 			String text = MyMsg.returnMessage(body);
 
 			Message newMessage = new Message();
@@ -531,7 +529,7 @@ class OFD_Server {
 						while((line = in.readLine()) != null && !line.equals(".")) {
 
 							input=input + line;
-							MyMessage MyMsg = new MyMessage();
+							MyMessage_OF MyMsg = new MyMessage_OF();
 							Log.debug("ServerInfo - Receive socket message: " + input);
 							String text = MyMsg.returnMessage(input);
 	
@@ -576,7 +574,7 @@ class OFD_Server {
 }
 
 
-class MyMessage {
+class MyMessage_OF {
 
 	private String msg =  "";
 	private int msgTot = 0;
