@@ -619,7 +619,7 @@ class MyMessage_OF {
 
 		else if ( message.equals("version") ) {
 
-			msg="ServerInfo version 0.4";
+			msg="ServerInfo version 0.4.1";
 		}
 
 		else if ( message.equals("openfire version") ) {
